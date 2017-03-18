@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CBusHackIdea</string>
+    <string name="title_activity_temp">TempActivity</string>
 </resources>
