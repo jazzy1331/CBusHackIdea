@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -97,12 +96,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_map) {
-            // Handle the camera action
-
-//            Intent intent = new Intent(this, MapsActivity.class);
-
-        } else if (id == R.id.nav_upcoming_events) {
+        if (id == R.id.nav_upcoming_events) {
 
         } else if (id == R.id.nav_weather) {
 
@@ -126,9 +120,13 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        MapHelperActivity mapHelperActivity = new MapHelperActivity(googleMap);
+        mapHelperActivity.beginFunctions();
+
+
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(39.961083, -82.987534);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15f));
+//        LatLng sydney = new LatLng(39.961083, -82.987534);
+//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15f));
     }
 }
