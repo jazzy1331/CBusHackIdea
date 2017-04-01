@@ -1,9 +1,15 @@
 package org.dvorak.cbushackidea;
 
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+
+import android.app.ProgressDialog;
+import android.content.Intent;
+
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
@@ -21,6 +27,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,13 +40,28 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.dvorak.cbushackidea.data.Channel;
+import org.dvorak.cbushackidea.data.Condition;
+import org.dvorak.cbushackidea.data.Item;
+import org.dvorak.cbushackidea.service.WeatherServiceCallback;
+import org.dvorak.cbushackidea.service.YahooWeatherService;
+
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, WeatherServiceCallback {
 
 //    Instance Variables to be used later on with the Map Functions
 
     private GoogleMap mMap;
     private LatLngBounds BOUNDS = new LatLngBounds(new LatLng(39.953786, -82.994589), new LatLng(39.974247, -82.981827));
+
+    private ImageView ivWeatherIcon;
+    private TextView tvTemperature;
+    private TextView tvLocation;
+    private TextView tvCondition;
+
+    private YahooWeatherService service;
+    private ProgressDialog dialog;
 
     private LatLng cscc;
     private LatLng collegeOfArtDesign;
@@ -95,12 +119,25 @@ public class MainActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
         onCreateDialog();
 
         SharedPreferences settings = getSharedPreferences(SP_NAME, 0);
         if (settings.getString("mapDialog", "F").equals("F")) {
             mapDialog.show();
         }
+
+        ivWeatherIcon = (ImageView)findViewById(R.id.ivWeatherIcon);
+        tvTemperature = (TextView)findViewById(R.id.tvTemperature);
+        tvCondition = (TextView)findViewById(R.id.tvCondition);
+        tvLocation = (TextView)findViewById(R.id.tvLocation);
+
+        service = new YahooWeatherService(this);
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Loading...");
+        dialog.show();
+
+        service.refreshWeather("Columbus, OH");
 
     }
 
@@ -251,6 +288,7 @@ public class MainActivity extends AppCompatActivity
         customTabsIntent.launchUrl(this, Uri.parse(url));
     }
 
+
     public void onCreateDialog() {
 
         final CheckBox cb1 = (CheckBox) findViewById(R.id.map_checkbox);
@@ -282,6 +320,26 @@ public class MainActivity extends AppCompatActivity
         }
         editor.putString("mapDialog", checkBoxResult);
         editor.commit();
+
+
+    @Override
+    public void serviceSuccess(Channel channel) {
+        dialog.hide();
+
+        Condition condition = channel.getItem().getCondition();
+        int resourceId = getResources().getIdentifier("icon_" + condition.getCode(), "drawable", getPackageName());
+
+        ivWeatherIcon.setImageResource(resourceId);
+        tvLocation.setText(service.getLocation());
+        tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
+        tvCondition.setText(condition.getDescription());
+
+    }
+
+    @Override
+    public void serviceFailure(Exception exception) {
+        dialog.hide();
+        Toast.makeText(this, exception.getMessage(),  Toast.LENGTH_LONG).show();
 
     }
 }
