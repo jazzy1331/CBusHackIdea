@@ -2,30 +2,25 @@ package org.dvorak.cbushackidea;
 
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-
-import android.app.ProgressDialog;
-import android.content.Intent;
-
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.customtabs.CustomTabsIntent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,7 +37,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.dvorak.cbushackidea.data.Channel;
 import org.dvorak.cbushackidea.data.Condition;
-import org.dvorak.cbushackidea.data.Item;
 import org.dvorak.cbushackidea.service.WeatherServiceCallback;
 import org.dvorak.cbushackidea.service.YahooWeatherService;
 
@@ -88,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private Marker grantMedicalCenterMarker;
     private Marker balletMetMarker;
     private final String COL = "#3F51B5";
+    private  NavigationView navigationView;
 
     private final String SP_NAME = "cbushackpref";
     private Dialog mapDialog;
@@ -110,7 +105,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 
@@ -127,10 +122,11 @@ public class MainActivity extends AppCompatActivity
             mapDialog.show();
         }
 
-        ivWeatherIcon = (ImageView)findViewById(R.id.ivWeatherIcon);
-        tvTemperature = (TextView)findViewById(R.id.tvTemperature);
-        tvCondition = (TextView)findViewById(R.id.tvCondition);
-        tvLocation = (TextView)findViewById(R.id.tvLocation);
+        final ConstraintLayout view = (ConstraintLayout) navigationView.getHeaderView(0);
+        ivWeatherIcon = (ImageView) view.findViewById(R.id.ivWeatherIcon);
+        tvTemperature = (TextView) view.findViewById(R.id.tvTemperature);
+        tvCondition = (TextView) view.findViewById(R.id.tvCondition);
+        tvLocation = (TextView) view.findViewById(R.id.tvLocation);
 
         service = new YahooWeatherService(this);
         dialog = new ProgressDialog(this);
@@ -302,13 +298,13 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
 
-        }
+            }
         });
 
         mapDialog = builder.create();
     }
 
-    public void onCheckboxClicked(View view){
+    public void onCheckboxClicked(View view) {
 
         CheckBox cb1 = (CheckBox) view;
         SharedPreferences settings = getSharedPreferences(SP_NAME, MODE_PRIVATE);
@@ -320,7 +316,7 @@ public class MainActivity extends AppCompatActivity
         }
         editor.putString("mapDialog", checkBoxResult);
         editor.commit();
-
+    }
 
     @Override
     public void serviceSuccess(Channel channel) {
@@ -329,17 +325,22 @@ public class MainActivity extends AppCompatActivity
         Condition condition = channel.getItem().getCondition();
         int resourceId = getResources().getIdentifier("icon_" + condition.getCode(), "drawable", getPackageName());
 
-        ivWeatherIcon.setImageResource(resourceId);
-        tvLocation.setText(service.getLocation());
-        tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
-        tvCondition.setText(condition.getDescription());
+            ivWeatherIcon.setImageResource(resourceId);
+
+            tvLocation.setText(service.getLocation());
+
+            tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
+
+            tvCondition.setText(condition.getDescription());
 
     }
 
     @Override
     public void serviceFailure(Exception exception) {
         dialog.hide();
-        Toast.makeText(this, exception.getMessage(),  Toast.LENGTH_LONG).show();
+        Toast.makeText(this, exception.getMessage(), Toast.LENGTH_LONG).show();
 
     }
 }
+
+
