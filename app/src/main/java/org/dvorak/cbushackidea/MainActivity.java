@@ -1,7 +1,13 @@
 package org.dvorak.cbushackidea;
 
+
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
+
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -9,6 +15,8 @@ import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,6 +89,10 @@ public class MainActivity extends AppCompatActivity
     private Marker balletMetMarker;
     private final String COL = "#3F51B5";
 
+    private final String SP_NAME = "cbushackpref";
+    private Dialog mapDialog;
+    private boolean isMapCheckboxChecked = false;
+
 
     //    Lifecycle method that always runs at the start of an activity
     @Override
@@ -106,6 +119,14 @@ public class MainActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+        onCreateDialog();
+
+        SharedPreferences settings = getSharedPreferences(SP_NAME, 0);
+        if (settings.getString("mapDialog", "F").equals("F")) {
+            mapDialog.show();
+        }
+
         ivWeatherIcon = (ImageView)findViewById(R.id.ivWeatherIcon);
         tvTemperature = (TextView)findViewById(R.id.tvTemperature);
         tvCondition = (TextView)findViewById(R.id.tvCondition);
@@ -117,7 +138,9 @@ public class MainActivity extends AppCompatActivity
         dialog.show();
 
         service.refreshWeather("Columbus, OH");
+
     }
+
 
     //    Lifecycle method that determines what happens if the system back button is pressed by the user
     @Override
@@ -265,6 +288,40 @@ public class MainActivity extends AppCompatActivity
         customTabsIntent.launchUrl(this, Uri.parse(url));
     }
 
+
+    public void onCreateDialog() {
+
+        final CheckBox cb1 = (CheckBox) findViewById(R.id.map_checkbox);
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        builder.setTitle("Map Help");
+        builder.setView(inflater.inflate(R.layout.activity_map_dialog, null));
+        builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+        }
+        });
+
+        mapDialog = builder.create();
+    }
+
+    public void onCheckboxClicked(View view){
+
+        CheckBox cb1 = (CheckBox) view;
+        SharedPreferences settings = getSharedPreferences(SP_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+
+        String checkBoxResult = "T";
+        if (cb1.isChecked() == false) {
+            checkBoxResult = "F";
+        }
+        editor.putString("mapDialog", checkBoxResult);
+        editor.commit();
+
+
     @Override
     public void serviceSuccess(Channel channel) {
         dialog.hide();
@@ -283,5 +340,6 @@ public class MainActivity extends AppCompatActivity
     public void serviceFailure(Exception exception) {
         dialog.hide();
         Toast.makeText(this, exception.getMessage(),  Toast.LENGTH_LONG).show();
+
     }
 }
