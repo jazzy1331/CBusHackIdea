@@ -1,16 +1,24 @@
 package org.dvorak.cbushackidea;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.view.View;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
  * Created by JasBawa on 3/30/2017.
  */
 
-public class MapHelperActivity {
+public class MapHelperActivity implements GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
     private LatLngBounds BOUNDS = new LatLngBounds(new LatLng(39.953786, -82.994589), new LatLng(39.974247, -82.981827));
@@ -28,12 +36,28 @@ public class MapHelperActivity {
     private LatLng grantMedicalCenter;
     private LatLng balletMet;
 
+
+    private Marker csccMarker;
+    private Marker collegeOfArtDesignMarker;
+    private Marker franklinUnivMarker;
+    private Marker capitalUnivLawMarker;
+    private Marker museumOfArtMarker;
+    private Marker metropolitanLibraryMarker;
+    private Marker topiaryParkMarker;
+    private Marker thurberHouseMarker;
+    private Marker cristoReyHSMarker;
+    private Marker keltonHouseMarker;
+    private Marker grantMedicalCenterMarker;
+    private Marker balletMetMarker;
+
+
     public MapHelperActivity(GoogleMap gMap) {
         mMap = gMap;
 
         mMap.setLatLngBoundsForCameraTarget(BOUNDS);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BOUNDS.getCenter(), 15f));
         mMap.setMinZoomPreference(14f);
+        mMap.setOnInfoWindowClickListener((GoogleMap.OnInfoWindowClickListener) this);
     }
 
 
@@ -57,20 +81,58 @@ public class MapHelperActivity {
         grantMedicalCenter = new LatLng(39.960812, -82.991183);
         balletMet = new LatLng(39.969623, -82.992805);
 
-        mMap.addMarker(new MarkerOptions().position(cscc).title("Columbus State Community College"));
-        mMap.addMarker(new MarkerOptions().position(collegeOfArtDesign).title("Columbus College of Art and Design"));
-        mMap.addMarker(new MarkerOptions().position(franklinUniv).title("Franklin University"));
-        mMap.addMarker(new MarkerOptions().position(capitalUnivLaw).title("Capital University Law School"));
-        mMap.addMarker(new MarkerOptions().position(museumOfArt).title("Columbus Museum of Art"));
-        mMap.addMarker(new MarkerOptions().position(metropolitanLibrary).title("Columbus Metropolitan Library"));
-        mMap.addMarker(new MarkerOptions().position(topiaryPark).title("Topiary Park"));
-        mMap.addMarker(new MarkerOptions().position(thurberHouse).title("Thurber Hosue"));
-        mMap.addMarker(new MarkerOptions().position(cristoReyHS).title("Cristo Rey Columbus High School"));
-        mMap.addMarker(new MarkerOptions().position(keltonHouse).title("Kelton House Museum and Garden"));
-        mMap.addMarker(new MarkerOptions().position(grantMedicalCenter).title("Grant Medical Center"));
-        mMap.addMarker(new MarkerOptions().position(balletMet).title("Ballet Met"));
+        csccMarker = mMap.addMarker(new MarkerOptions().position(cscc).title("Columbus State Community College"));
+        collegeOfArtDesignMarker = mMap.addMarker(new MarkerOptions().position(collegeOfArtDesign).title("Columbus College of Art and Design"));
+        franklinUnivMarker = mMap.addMarker(new MarkerOptions().position(franklinUniv).title("Franklin University"));
+        capitalUnivLawMarker = mMap.addMarker(new MarkerOptions().position(capitalUnivLaw).title("Capital University Law School"));
+        museumOfArtMarker = mMap.addMarker(new MarkerOptions().position(museumOfArt).title("Columbus Museum of Art"));
+        metropolitanLibraryMarker = mMap.addMarker(new MarkerOptions().position(metropolitanLibrary).title("Columbus Metropolitan Library"));
+        topiaryParkMarker = mMap.addMarker(new MarkerOptions().position(topiaryPark).title("Topiary Park"));
+        thurberHouseMarker = mMap.addMarker(new MarkerOptions().position(thurberHouse).title("Thurber Hosue"));
+        cristoReyHSMarker = mMap.addMarker(new MarkerOptions().position(cristoReyHS).title("Cristo Rey Columbus High School"));
+        keltonHouseMarker = mMap.addMarker(new MarkerOptions().position(keltonHouse).title("Kelton House Museum and Garden"));
+        grantMedicalCenterMarker = mMap.addMarker(new MarkerOptions().position(grantMedicalCenter).title("Grant Medical Center"));
+        balletMetMarker = mMap.addMarker(new MarkerOptions().position(balletMet).title("Ballet Met"));
 
 
     }
 
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+
+
+
+        if (marker.equals(csccMarker)) {
+
+
+
+
+        } else if (marker.equals(collegeOfArtDesignMarker)) {
+
+        } else if (marker.equals(franklinUnivMarker)) {
+
+        } else if (marker.equals(capitalUnivLawMarker)) {
+
+        } else if (marker.equals(museumOfArtMarker)) {
+
+        } else if (marker.equals(metropolitanLibraryMarker)) {
+
+        } else if (marker.equals(topiaryParkMarker)) {
+
+        } else if (marker.equals(thurberHouseMarker)) {
+
+        } else if (marker.equals(cristoReyHSMarker)) {
+
+        } else if (marker.equals(keltonHouseMarker)) {
+
+        } else if (marker.equals(grantMedicalCenterMarker)) {
+
+        } else if (marker.equals(balletMetMarker)) {
+
+        }
+
+
+    }
 }

@@ -1,7 +1,10 @@
 package org.dvorak.cbushackidea;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -19,20 +22,55 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+
+//    Instance Variables to be used later on with the Map Functions
 
     private GoogleMap mMap;
+    private LatLngBounds BOUNDS = new LatLngBounds(new LatLng(39.953786, -82.994589), new LatLng(39.974247, -82.981827));
 
+    private LatLng cscc;
+    private LatLng collegeOfArtDesign;
+    private LatLng franklinUniv;
+    private LatLng capitalUnivLaw;
+    private LatLng museumOfArt;
+    private LatLng metropolitanLibrary;
+    private LatLng topiaryPark;
+    private LatLng thurberHouse;
+    private LatLng cristoReyHS;
+    private LatLng keltonHouse;
+    private LatLng grantMedicalCenter;
+    private LatLng balletMet;
+    private Marker csccMarker;
+    private Marker collegeOfArtDesignMarker;
+    private Marker franklinUnivMarker;
+    private Marker capitalUnivLawMarker;
+    private Marker museumOfArtMarker;
+    private Marker metropolitanLibraryMarker;
+    private Marker topiaryParkMarker;
+    private Marker thurberHouseMarker;
+    private Marker cristoReyHSMarker;
+    private Marker keltonHouseMarker;
+    private Marker grantMedicalCenterMarker;
+    private Marker balletMetMarker;
+    private final String COL = "#3F51B5";
+
+
+    //    Lifecycle method that always runs at the start of an activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//        Calls the parent method, sets the layout to be used with this class, and sets the toolbar
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+//        Sets up the FAB Button that displays on activity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,6 +80,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+//        Sets up the Navigation Drawer that is used as the primary means of navigation through the app
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -52,12 +91,13 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+//        Sets up the map in the background and automatically calls onMapReady() when the map is ready to be customized and displayed
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
-
+    //    Lifecycle method that determines what happens if the system back button is pressed by the user
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -68,6 +108,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    //    Creates the options menu on the right side of the toolbar and gives it options to present to the user
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -75,6 +116,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    //    When an option is selected, this method is called to handle what happens
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -90,6 +132,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    //    When a item is selected in the navigation drawer, this method is called to handle what happens
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -97,6 +140,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_upcoming_events) {
+
 
         } else if (id == R.id.nav_weather) {
 
@@ -120,13 +164,82 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        MapHelperActivity mapHelperActivity = new MapHelperActivity(googleMap);
-        mapHelperActivity.beginFunctions();
+        mMap.setLatLngBoundsForCameraTarget(BOUNDS);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BOUNDS.getCenter(), 15f));
+        mMap.setMinZoomPreference(14f);
+        mMap.setOnInfoWindowClickListener((GoogleMap.OnInfoWindowClickListener) this);
+        createMarkers();
 
+//        MapHelperActivity mapHelperActivity = new MapHelperActivity(googleMap);
+//        mapHelperActivity.beginFunctions();
 
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(39.961083, -82.987534);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15f));
+    }
+
+    //    Is called when the map is ready and basic parameters of the map are set-up. This method creates all the orange markers on the map
+    public void createMarkers() {
+
+        cscc = new LatLng(39.969207, -82.987206);
+        collegeOfArtDesign = new LatLng(39.965000, -82.989781);
+        franklinUniv = new LatLng(39.958361, -82.990331);
+        capitalUnivLaw = new LatLng(39.962738, -82.992002);
+        museumOfArt = new LatLng(39.964385, -82.987772);
+        metropolitanLibrary = new LatLng(39.961219, -82.989510);
+        topiaryPark = new LatLng(39.961183, -82.987481);
+        thurberHouse = new LatLng(39.965770, -82.985203);
+        cristoReyHS = new LatLng(39.960782, -82.988985);
+        keltonHouse = new LatLng(39.960795, -82.984303);
+        grantMedicalCenter = new LatLng(39.960812, -82.991183);
+        balletMet = new LatLng(39.969623, -82.992805);
+
+        csccMarker = mMap.addMarker(new MarkerOptions().position(cscc).title("Columbus State Community College"));
+        collegeOfArtDesignMarker = mMap.addMarker(new MarkerOptions().position(collegeOfArtDesign).title("Columbus College of Art and Design"));
+        franklinUnivMarker = mMap.addMarker(new MarkerOptions().position(franklinUniv).title("Franklin University"));
+        capitalUnivLawMarker = mMap.addMarker(new MarkerOptions().position(capitalUnivLaw).title("Capital University Law School"));
+        museumOfArtMarker = mMap.addMarker(new MarkerOptions().position(museumOfArt).title("Columbus Museum of Art"));
+        metropolitanLibraryMarker = mMap.addMarker(new MarkerOptions().position(metropolitanLibrary).title("Columbus Metropolitan Library"));
+        topiaryParkMarker = mMap.addMarker(new MarkerOptions().position(topiaryPark).title("Topiary Park"));
+        thurberHouseMarker = mMap.addMarker(new MarkerOptions().position(thurberHouse).title("Thurber Hosue"));
+        cristoReyHSMarker = mMap.addMarker(new MarkerOptions().position(cristoReyHS).title("Cristo Rey Columbus High School"));
+        keltonHouseMarker = mMap.addMarker(new MarkerOptions().position(keltonHouse).title("Kelton House Museum and Garden"));
+        grantMedicalCenterMarker = mMap.addMarker(new MarkerOptions().position(grantMedicalCenter).title("Grant Medical Center"));
+        balletMetMarker = mMap.addMarker(new MarkerOptions().position(balletMet).title("Ballet Met"));
+    }
+
+    //    When a marker is selected by the user, this function is called to handle it and do something(or not) with it
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+        String url = "";
+        if (marker.equals(csccMarker)) {
+            url = "http://www.cscc.edu";
+        } else if (marker.equals(collegeOfArtDesignMarker)) {
+            url = "http://www.ccad.edu";
+        } else if (marker.equals(franklinUnivMarker)) {
+            url = "http://www.franklin.edu";
+        } else if (marker.equals(capitalUnivLawMarker)) {
+            url = "http://law.capital.edu";
+        } else if (marker.equals(museumOfArtMarker)) {
+            url = "https://www.columbusmuseum.org";
+        } else if (marker.equals(metropolitanLibraryMarker)) {
+            url = "http://www.columbuslibrary.org";
+        } else if (marker.equals(topiaryParkMarker)) {
+            url = "http://www.topiarypark.org";
+        } else if (marker.equals(thurberHouseMarker)) {
+            url = "http://www.thurberhouse.org/";
+        } else if (marker.equals(cristoReyHSMarker)) {
+            url = "http://www.cristoreycolumbus.org/";
+        } else if (marker.equals(keltonHouseMarker)) {
+            url = "http://keltonhouse.com/";
+        } else if (marker.equals(grantMedicalCenterMarker)) {
+            url = "https://www.ohiohealth.com/locations/hospitals-and-emergency-departments/grant-medical-center";
+        } else if (marker.equals(balletMetMarker)) {
+            url = "https://www.balletmet.org/";
+        }
+
+//        Sets up the Chrome Custom Tab that will display a given URL with specifications on how to display it
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setToolbarColor(Color.parseColor(COL));
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, Uri.parse(url));
     }
 }
