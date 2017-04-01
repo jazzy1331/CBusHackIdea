@@ -1,12 +1,16 @@
 package org.dvorak.cbushackidea;
 
-import android.content.Intent;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CheckBox;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,6 +65,10 @@ public class MainActivity extends AppCompatActivity
     private Marker balletMetMarker;
     private final String COL = "#3F51B5";
 
+    private final String SP_NAME = "cbushackpref";
+    private Dialog mapDialog;
+    private boolean isMapCheckboxChecked = false;
+
 
     //    Lifecycle method that always runs at the start of an activity
     @Override
@@ -69,16 +78,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-//        Sets up the FAB Button that displays on activity
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
 //        Sets up the Navigation Drawer that is used as the primary means of navigation through the app
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -95,7 +94,16 @@ public class MainActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        onCreateDialog();
+
+        SharedPreferences settings = getSharedPreferences(SP_NAME, 0);
+        if (settings.getString("mapDialog", "F").equals("F")) {
+            mapDialog.show();
+        }
+
     }
+
 
     //    Lifecycle method that determines what happens if the system back button is pressed by the user
     @Override
@@ -241,5 +249,39 @@ public class MainActivity extends AppCompatActivity
         builder.setToolbarColor(Color.parseColor(COL));
         CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
+    }
+
+    public void onCreateDialog() {
+
+        final CheckBox cb1 = (CheckBox) findViewById(R.id.map_checkbox);
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        builder.setTitle("Map Help");
+        builder.setView(inflater.inflate(R.layout.activity_map_dialog, null));
+        builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+        }
+        });
+
+        mapDialog = builder.create();
+    }
+
+    public void onCheckboxClicked(View view){
+
+        CheckBox cb1 = (CheckBox) view;
+        SharedPreferences settings = getSharedPreferences(SP_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+
+        String checkBoxResult = "T";
+        if (cb1.isChecked() == false) {
+            checkBoxResult = "F";
+        }
+        editor.putString("mapDialog", checkBoxResult);
+        editor.commit();
+
     }
 }
