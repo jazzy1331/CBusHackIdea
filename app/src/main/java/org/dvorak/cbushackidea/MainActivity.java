@@ -211,8 +211,6 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnInfoWindowClickListener((GoogleMap.OnInfoWindowClickListener) this);
         createMarkers();
 
-//        MapHelperActivity mapHelperActivity = new MapHelperActivity(googleMap);
-//        mapHelperActivity.beginFunctions();
 
     }
 
@@ -325,16 +323,18 @@ public class MainActivity extends AppCompatActivity
         Condition condition = channel.getItem().getCondition();
         int resourceId = getResources().getIdentifier("icon_" + condition.getCode(), "drawable", getPackageName());
 
-        //if (ivWeatherIcon != null)
             ivWeatherIcon.setImageResource(resourceId);
 
-        //if (tvLocation != null)
             tvLocation.setText(service.getLocation());
 
-        //if (tvTemperature != null)
             tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
 
-        //if (tvCondition != null)
+            ivWeatherIcon.setImageResource(resourceId);
+
+            tvLocation.setText(service.getLocation());
+
+            tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
+
             tvCondition.setText(condition.getDescription());
 
     }
