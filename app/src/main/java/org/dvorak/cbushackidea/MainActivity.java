@@ -1,7 +1,9 @@
 package org.dvorak.cbushackidea;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
@@ -16,6 +18,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,13 +31,28 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.dvorak.cbushackidea.data.Channel;
+import org.dvorak.cbushackidea.data.Condition;
+import org.dvorak.cbushackidea.data.Item;
+import org.dvorak.cbushackidea.service.WeatherServiceCallback;
+import org.dvorak.cbushackidea.service.YahooWeatherService;
+
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, WeatherServiceCallback {
 
 //    Instance Variables to be used later on with the Map Functions
 
     private GoogleMap mMap;
     private LatLngBounds BOUNDS = new LatLngBounds(new LatLng(39.953786, -82.994589), new LatLng(39.974247, -82.981827));
+
+    private ImageView ivWeatherIcon;
+    private TextView tvTemperature;
+    private TextView tvLocation;
+    private TextView tvCondition;
+
+    private YahooWeatherService service;
+    private ProgressDialog dialog;
 
     private LatLng cscc;
     private LatLng collegeOfArtDesign;
@@ -70,16 +90,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        Sets up the FAB Button that displays on activity
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
 //        Sets up the Navigation Drawer that is used as the primary means of navigation through the app
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -95,6 +105,18 @@ public class MainActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        ivWeatherIcon = (ImageView)findViewById(R.id.ivWeatherIcon);
+        tvTemperature = (TextView)findViewById(R.id.tvTemperature);
+        tvCondition = (TextView)findViewById(R.id.tvCondition);
+        tvLocation = (TextView)findViewById(R.id.tvLocation);
+
+        service = new YahooWeatherService(this);
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Loading...");
+        dialog.show();
+
+        service.refreshWeather("Columbus, OH");
     }
 
     //    Lifecycle method that determines what happens if the system back button is pressed by the user
@@ -241,5 +263,25 @@ public class MainActivity extends AppCompatActivity
         builder.setToolbarColor(Color.parseColor(COL));
         CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
+    }
+
+    @Override
+    public void serviceSuccess(Channel channel) {
+        dialog.hide();
+
+        Condition condition = channel.getItem().getCondition();
+        int resourceId = getResources().getIdentifier("icon_" + condition.getCode(), "drawable", getPackageName());
+
+        ivWeatherIcon.setImageResource(resourceId);
+        tvLocation.setText(service.getLocation());
+        tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
+        tvCondition.setText(condition.getDescription());
+
+    }
+
+    @Override
+    public void serviceFailure(Exception exception) {
+        dialog.hide();
+        Toast.makeText(this, exception.getMessage(),  Toast.LENGTH_LONG).show();
     }
 }
