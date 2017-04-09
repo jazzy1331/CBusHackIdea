@@ -42,6 +42,7 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".MapDialog"></activity>
+        <service android:name=".GeofenceTransitionsIntentService"/>
     </application>
 
 </manifest>
