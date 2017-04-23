@@ -4,6 +4,7 @@ package org.dvorak.cbushackidea;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
@@ -181,7 +182,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_upcoming_events) {
-
+            Intent intent = new Intent(this, UpcomingEventsActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_weather) {
 

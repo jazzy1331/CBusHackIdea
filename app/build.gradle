@@ -7,7 +7,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "org.dvorak.cbushackidea"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -27,5 +27,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:10.2.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:customtabs:25.0.0'
+    compile 'com.github.sundeepk:compact-calendar-view:1.9.1'
     testCompile 'junit:junit:4.12'
+
 }

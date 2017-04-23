@@ -22,5 +22,6 @@
     <string name="temperature">Temperature</string>
     <string name="location">Location</string>
     <string name="condition">Condition</string>
+    <string name="title_activity_upcoming_events">UpcomingEventsActivity</string>
 
 </resources>
