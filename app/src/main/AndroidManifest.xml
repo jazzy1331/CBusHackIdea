@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -40,6 +41,12 @@
             android:value="@string/google_maps_key" />
 
 
+        <activity
+            android:name=".UpcomingEventsActivity"
+            android:label="@string/title_activity_upcoming_events"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+
+
         <service android:name=".GeofenceTransitionsIntentService" />
 
         <activity
@@ -51,6 +58,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.dvorak.cbushackidea.MainActivity" />
         </activity>
+
     </application>
 
 </manifest>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="org.dvorak.cbushackidea.UpcomingEventsActivity"
+    tools:showIn="@layout/activity_upcoming_events">
+
+    <com.github.sundeepk.compactcalendarview.CompactCalendarView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/compactcalendar_view"
+        android:layout_width="wrap_content"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="50dp"
+        android:layout_height="542dp"
+        app:compactCalendarTextSize="20sp"
+        app:compactCalendarTextColor="#000"
+        app:compactCalendarMultiEventIndicatorColor="#fff"
+        />
+
+</android.support.constraint.ConstraintLayout>

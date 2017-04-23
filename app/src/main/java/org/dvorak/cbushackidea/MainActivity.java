@@ -216,7 +216,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_upcoming_events) {
-
+            Intent intent = new Intent(this, UpcomingEventsActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_weather) {
 
