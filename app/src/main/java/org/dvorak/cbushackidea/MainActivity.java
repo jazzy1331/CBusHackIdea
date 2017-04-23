@@ -2,6 +2,7 @@ package org.dvorak.cbushackidea;
 
 
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.NavigationView;
@@ -18,15 +21,24 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,35 +53,19 @@ import org.dvorak.cbushackidea.data.Condition;
 import org.dvorak.cbushackidea.service.WeatherServiceCallback;
 import org.dvorak.cbushackidea.service.YahooWeatherService;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, WeatherServiceCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, WeatherServiceCallback, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<Status> {
 
-//    Instance Variables to be used later on with the Map Functions
 
+    //    Instance Variables to be used later on with the Map Functions
     private GoogleMap mMap;
     private LatLngBounds BOUNDS = new LatLngBounds(new LatLng(39.953786, -82.994589), new LatLng(39.974247, -82.981827));
-
-    private ImageView ivWeatherIcon;
-    private TextView tvTemperature;
-    private TextView tvLocation;
-    private TextView tvCondition;
-
-    private YahooWeatherService service;
-    private ProgressDialog dialog;
-
-    private LatLng cscc;
-    private LatLng collegeOfArtDesign;
-    private LatLng franklinUniv;
-    private LatLng capitalUnivLaw;
-    private LatLng museumOfArt;
-    private LatLng metropolitanLibrary;
-    private LatLng topiaryPark;
-    private LatLng thurberHouse;
-    private LatLng cristoReyHS;
-    private LatLng keltonHouse;
-    private LatLng grantMedicalCenter;
-    private LatLng balletMet;
     private Marker csccMarker;
     private Marker collegeOfArtDesignMarker;
     private Marker franklinUnivMarker;
@@ -82,12 +78,22 @@ public class MainActivity extends AppCompatActivity
     private Marker keltonHouseMarker;
     private Marker grantMedicalCenterMarker;
     private Marker balletMetMarker;
-    private final String COL = "#3F51B5";
-    private  NavigationView navigationView;
 
+    //    Instance Variables used for Dialog Box and saving data
     private final String SP_NAME = "cbushackpref";
     private Dialog mapDialog;
-    private boolean isMapCheckboxChecked = false;
+
+    //    Instance Variables used for the Weather Functionality
+    private ImageView ivWeatherIcon;
+    private TextView tvTemperature;
+    private TextView tvLocation;
+    private TextView tvCondition;
+
+    private YahooWeatherService service;
+    private ProgressDialog dialog;
+
+    protected ArrayList<Geofence> mGeofenceList;
+    protected GoogleApiClient mGoogleApiClient;
 
 
     //    Lifecycle method that always runs at the start of an activity
@@ -106,7 +112,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 
@@ -115,14 +121,15 @@ public class MainActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
+//        Calls the function to build the dialog box and then checks saved data if there is a need to show it or not
         onCreateDialog();
-
         SharedPreferences settings = getSharedPreferences(SP_NAME, 0);
         if (settings.getString("mapDialog", "F").equals("F")) {
             mapDialog.show();
         }
 
+
+//        Instantiates Instance Variables used for weather
         final ConstraintLayout view = (ConstraintLayout) navigationView.getHeaderView(0);
         ivWeatherIcon = (ImageView) view.findViewById(R.id.ivWeatherIcon);
         tvTemperature = (TextView) view.findViewById(R.id.tvTemperature);
@@ -135,6 +142,31 @@ public class MainActivity extends AppCompatActivity
         dialog.show();
 
         service.refreshWeather("Columbus, OH");
+
+        // Empty list for storing geofences.
+        mGeofenceList = new ArrayList<Geofence>();
+
+        // Get the geofences used. Geofence data is hard coded
+        populateGeofenceList();
+
+        // Kick off the request to build GoogleApiClient.
+        buildGoogleApiClient();
+
+        if (!mGoogleApiClient.isConnected()) {
+            Toast.makeText(this, "Google API Client not connected!", Toast.LENGTH_SHORT).show();
+            mGoogleApiClient.connect();
+            return;
+        }
+
+        try {
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(),
+                    getGeofencePendingIntent()
+            ).setResultCallback(this); // Result processed in onResult().
+        } catch (SecurityException securityException) {
+            // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
+        }
 
     }
 
@@ -168,6 +200,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, AboutActivity.class);
+            this.startActivity(intent);
             return true;
         }
 
@@ -212,25 +246,23 @@ public class MainActivity extends AppCompatActivity
         mMap.setMinZoomPreference(14f);
         mMap.setOnInfoWindowClickListener((GoogleMap.OnInfoWindowClickListener) this);
         createMarkers();
-
-
     }
 
     //    Is called when the map is ready and basic parameters of the map are set-up. This method creates all the orange markers on the map
     public void createMarkers() {
 
-        cscc = new LatLng(39.969207, -82.987206);
-        collegeOfArtDesign = new LatLng(39.965000, -82.989781);
-        franklinUniv = new LatLng(39.958361, -82.990331);
-        capitalUnivLaw = new LatLng(39.962738, -82.992002);
-        museumOfArt = new LatLng(39.964385, -82.987772);
-        metropolitanLibrary = new LatLng(39.961219, -82.989510);
-        topiaryPark = new LatLng(39.961183, -82.987481);
-        thurberHouse = new LatLng(39.965770, -82.985203);
-        cristoReyHS = new LatLng(39.960782, -82.988985);
-        keltonHouse = new LatLng(39.960795, -82.984303);
-        grantMedicalCenter = new LatLng(39.960812, -82.991183);
-        balletMet = new LatLng(39.969623, -82.992805);
+        LatLng cscc = new LatLng(39.969207, -82.987206);
+        LatLng collegeOfArtDesign = new LatLng(39.965000, -82.989781);
+        LatLng franklinUniv = new LatLng(39.958361, -82.990331);
+        LatLng capitalUnivLaw = new LatLng(39.962738, -82.992002);
+        LatLng museumOfArt = new LatLng(39.964385, -82.987772);
+        LatLng metropolitanLibrary = new LatLng(39.961219, -82.989510);
+        LatLng topiaryPark = new LatLng(39.961183, -82.987481);
+        LatLng thurberHouse = new LatLng(39.965770, -82.985203);
+        LatLng cristoReyHS = new LatLng(39.960782, -82.988985);
+        LatLng keltonHouse = new LatLng(39.960795, -82.984303);
+        LatLng grantMedicalCenter = new LatLng(39.960812, -82.991183);
+        LatLng balletMet = new LatLng(39.969623, -82.992805);
 
         csccMarker = mMap.addMarker(new MarkerOptions().position(cscc).title("Columbus State Community College"));
         collegeOfArtDesignMarker = mMap.addMarker(new MarkerOptions().position(collegeOfArtDesign).title("Columbus College of Art and Design"));
@@ -246,7 +278,7 @@ public class MainActivity extends AppCompatActivity
         balletMetMarker = mMap.addMarker(new MarkerOptions().position(balletMet).title("Ballet Met"));
     }
 
-    //    When a marker is selected by the user, this function is called to handle it and do something(or not) with it
+    //    When a marker is selected by the user, this function is called to handle it and do something with it
     @Override
     public void onInfoWindowClick(Marker marker) {
 
@@ -277,18 +309,16 @@ public class MainActivity extends AppCompatActivity
             url = "https://www.balletmet.org/";
         }
 
-//        Sets up the Chrome Custom Tab that will display a given URL with specifications on how to display it
+//        Sets up the Chrome Custom Tab that will display a given URL along with specifications on how to display it
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        String COL = "#3F51B5";
         builder.setToolbarColor(Color.parseColor(COL));
         CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
     }
 
-
+    //    Builds the fundamentals of the Map Help Dialog Box at the start the activity
     public void onCreateDialog() {
-
-        final CheckBox cb1 = (CheckBox) findViewById(R.id.map_checkbox);
-
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -304,6 +334,7 @@ public class MainActivity extends AppCompatActivity
         mapDialog = builder.create();
     }
 
+    //    When the checkbox on the Dialog Box is clicked, this method is called automatically to change the saved data
     public void onCheckboxClicked(View view) {
 
         CheckBox cb1 = (CheckBox) view;
@@ -311,13 +342,14 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.Editor editor = settings.edit();
 
         String checkBoxResult = "T";
-        if (cb1.isChecked() == false) {
+        if (!cb1.isChecked()) {
             checkBoxResult = "F";
         }
         editor.putString("mapDialog", checkBoxResult);
-        editor.commit();
+        editor.apply();
     }
 
+    //    Patrick, ADD COMMENTS TO UR THINGS CAUSE I NO UNDERSTAND
     @Override
     public void serviceSuccess(Channel channel) {
         dialog.hide();
@@ -325,27 +357,108 @@ public class MainActivity extends AppCompatActivity
         Condition condition = channel.getItem().getCondition();
         int resourceId = getResources().getIdentifier("icon_" + condition.getCode(), "drawable", getPackageName());
 
-            ivWeatherIcon.setImageResource(resourceId);
+        ivWeatherIcon.setImageResource(resourceId);
 
-            tvLocation.setText(service.getLocation());
+        tvLocation.setText(service.getLocation());
 
-            tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
+        tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
 
-            ivWeatherIcon.setImageResource(resourceId);
-
-            tvLocation.setText(service.getLocation());
-
-            tvTemperature.setText(condition.getTemperature() + "\u00B0" + channel.getUnits().getTemperature());
-
-            tvCondition.setText(condition.getDescription());
+        tvCondition.setText(condition.getDescription());
 
     }
 
+    //    Patrick, ADD COMMENTS TO UR THINGS CAUSE I NO UNDERSTAND
     @Override
     public void serviceFailure(Exception exception) {
         dialog.hide();
         Toast.makeText(this, exception.getMessage(), Toast.LENGTH_LONG).show();
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (!mGoogleApiClient.isConnecting() || !mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d("Main Activity", "Connected");
+        Toast.makeText(this, "Google API Client is connected!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+        Log.d("Main Activity", "Suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        mGoogleApiClient.connect();
+        Log.d("Main Activity", "Failed");
+    }
+
+    @Override
+    public void onResult(@NonNull Status status) {
+        if (status.isSuccess()) {
+            Toast.makeText(
+                    this,
+                    "Geofences Added",
+                    Toast.LENGTH_SHORT
+            ).show();
+        } else {
+            // Get the status code for the error and log it using a user-friendly message.
+            String errorMessage = "IDK I DELETED THE CODE";
+        }
+
+    }
+
+    public void populateGeofenceList() {
+        for (Map.Entry<String, LatLng> entry : Constants.PLACES.entrySet()) {
+            mGeofenceList.add(new Geofence.Builder()
+                    .setRequestId(entry.getKey())
+                    .setCircularRegion(
+                            entry.getValue().latitude,
+                            entry.getValue().longitude,
+                            Constants.GEOFENCE_RADIUS_IN_METERS
+                    )
+                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                    .setLoiteringDelay(10)
+                    .build());
+        }
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofences(mGeofenceList);
+        return builder.build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling addgeoFences()
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
 

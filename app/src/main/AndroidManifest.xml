@@ -40,11 +40,25 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".MapDialog" />
+
         <activity
             android:name=".UpcomingEventsActivity"
             android:label="@string/title_activity_upcoming_events"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+
+
+        <service android:name=".GeofenceTransitionsIntentService" />
+
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.dvorak.cbushackidea.MainActivity" />
+        </activity>
+
     </application>
 
 </manifest>
