@@ -136,11 +136,13 @@ public class MainActivity extends AppCompatActivity
         tvCondition = (TextView) view.findViewById(R.id.tvCondition);
         tvLocation = (TextView) view.findViewById(R.id.tvLocation);
 
+        // Instantiate service and dialog, set them to appropriate values, and show the dialog
         service = new YahooWeatherService(this);
         dialog = new ProgressDialog(this);
         dialog.setMessage("Loading...");
         dialog.show();
 
+        // Refresh the weather
         service.refreshWeather("Columbus, OH");
 
         // Empty list for storing geofences.
@@ -349,7 +351,9 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
     }
 
-    //    Patrick, ADD COMMENTS TO UR THINGS CAUSE I NO UNDERSTAND
+    /*
+     * Sets all of the necessary image and text views to display the weather if the weather was able to be retrieved from Yahoo
+     */
     @Override
     public void serviceSuccess(Channel channel) {
         dialog.hide();
@@ -367,7 +371,10 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    //    Patrick, ADD COMMENTS TO UR THINGS CAUSE I NO UNDERSTAND
+    /*
+     * Brings up a message saying that there isn't any weather information available for that location
+     * if none can be received from Yahoo for whatever reason
+     */
     @Override
     public void serviceFailure(Exception exception) {
         dialog.hide();

@@ -43,8 +43,10 @@
 
         <activity
             android:name=".UpcomingEventsActivity"
-            android:label="@string/title_activity_upcoming_events"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:label="UpcomingEventsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
 
 
         <service android:name=".GeofenceTransitionsIntentService" />
