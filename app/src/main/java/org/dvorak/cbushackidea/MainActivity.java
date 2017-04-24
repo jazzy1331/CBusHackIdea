@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity
 
 //        Debugging message to check if the phone and app are connected to the
         if (!mGoogleApiClient.isConnected()) {
-            Toast.makeText(this, "Google API Client not connected!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Google API Client not connected!", Toast.LENGTH_SHORT).show();
             mGoogleApiClient.connect();
             return;
         }
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, UpcomingEventsActivity.class);
             startActivity(intent);
 
-        } else if (id == R.id.nav_weather) {
+        } else if (id == R.id.nav_park) {
 
             Intent intent = new Intent(this, ParkingActivity.class);
             startActivity(intent);
@@ -414,7 +414,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d("Main Activity", "Connected");
-        Toast.makeText(this, "Google API Client is connected!", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Google API Client is connected!", Toast.LENGTH_SHORT).show();
     }
 //    API Method that does something when the Google API Client connection is suspended
     @Override
@@ -434,11 +434,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResult(@NonNull Status status) {
         if (status.isSuccess()) {
-            Toast.makeText(
-                    this,
-                    "Geofences Added",
-                    Toast.LENGTH_SHORT
-            ).show();
+//            Toast.makeText(
+//                    this,
+//                    "Geofences Added",
+//                    Toast.LENGTH_SHORT
+//            ).show();
         } else {
             // Get the status code for the error and log it using a user-friendly message.
             String errorMessage = "ERROR";
