@@ -28,6 +28,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         super(TAG);  // use TAG to name the IntentService worker thread
     }
 
+//    When near a geofence, this Intent starts the process of alerting the user
     @Override
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
@@ -39,6 +40,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         sendNotification(description);
     }
 
+//    Creates a String with all the details for the geofence the phone is near
     private static String getGeofenceTransitionDetails(GeofencingEvent event) {
         String transitionString =
                 GeofenceStatusCodes.getStatusCodeString(event.getGeofenceTransition());
@@ -49,6 +51,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         return String.format("%s: %s", transitionString, TextUtils.join(", ", triggeringIDs));
     }
 
+//    Method sends a notification to the phone
     private void sendNotification(String notificationDetails) {
         // Create an explicit content Intent that starts MainActivity.
         Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);

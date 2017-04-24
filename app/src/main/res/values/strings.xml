@@ -20,6 +20,8 @@
     <string name="condition">Condition</string>
 
     <string name="title_activity_about">About</string>
+    <string name="title_activity_upcoming_events">Upcoming Events</string>
+    <string name="title_activity_parking">Parking Guage</string>
 
 
 </resources>

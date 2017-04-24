@@ -17,6 +17,7 @@ public class Constants {
 
     public static final HashMap<String, LatLng> PLACES = new HashMap<String, LatLng>();
 
+//    A Hashmap that contains a couple locations in the Discovery District
     static {
         // Metropolitan Library
         PLACES.put("Columbus Metropolitan Library", new LatLng(39.961219, -82.989510));
