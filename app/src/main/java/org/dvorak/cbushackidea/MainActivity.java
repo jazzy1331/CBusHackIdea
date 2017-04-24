@@ -1,5 +1,11 @@
 package org.dvorak.cbushackidea;
 
+import org.dvorak.cbushackidea.service.WeatherServiceCallback;
+
+/*
+ * This is the activity that is called and used when the app is opened every time. This activity gets the navigation drawer ready,
+ * the location map, the weather service used at the top of the navigation drawer, and sets a menu on the top right of the page.
+ */
 
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -63,7 +69,7 @@ public class MainActivity extends AppCompatActivity
         ResultCallback<Status> {
 
 
-    //    Instance Variables to be used later on with the Map Functions
+    //    Instance Variables used with the Map Functions
     private GoogleMap mMap;
     private LatLngBounds BOUNDS = new LatLngBounds(new LatLng(39.953786, -82.994589), new LatLng(39.974247, -82.981827));
     private Marker csccMarker;
@@ -121,7 +127,7 @@ public class MainActivity extends AppCompatActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        Calls the function to build the dialog box and then checks saved data if there is a need to show it or not
+//        Calls the function to build the dialog box and then checks saved data to see if there is a need to show it or not
         onCreateDialog();
         SharedPreferences settings = getSharedPreferences(SP_NAME, 0);
         if (settings.getString("mapDialog", "F").equals("F")) {
@@ -154,6 +160,7 @@ public class MainActivity extends AppCompatActivity
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
 
+//        Debugging message to check if the phone and app are connected to the
         if (!mGoogleApiClient.isConnected()) {
             Toast.makeText(this, "Google API Client not connected!", Toast.LENGTH_SHORT).show();
             mGoogleApiClient.connect();
@@ -215,6 +222,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+
         int id = item.getItemId();
 
         if (id == R.id.nav_upcoming_events) {
@@ -223,6 +231,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_weather) {
 
+            Intent intent = new Intent(this, ParkingActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -284,6 +294,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onInfoWindowClick(Marker marker) {
 
+//        Based on which marker's info window is clicked, variable "url" is assigned to it's web address
         String url = "";
         if (marker.equals(csccMarker)) {
             url = "http://www.cscc.edu";
@@ -381,7 +392,7 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, exception.getMessage(), Toast.LENGTH_LONG).show();
 
     }
-
+// Lifecycle method that does stuff everytime the activity is opened from within the app
     @Override
     public void onStart() {
         super.onStart();
@@ -390,6 +401,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+//    Lifecycle method that does stuff everytime the activity is closed from within the app
     @Override
     protected void onStop() {
         super.onStop();
@@ -398,24 +410,27 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+//    API method that does something when the Google API Client is connected
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d("Main Activity", "Connected");
         Toast.makeText(this, "Google API Client is connected!", Toast.LENGTH_SHORT).show();
     }
-
+//    API Method that does something when the Google API Client connection is suspended
     @Override
     public void onConnectionSuspended(int i) {
         mGoogleApiClient.connect();
         Log.d("Main Activity", "Suspended");
     }
 
+//    API Method that does something when the Google API Client failed to connect
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         mGoogleApiClient.connect();
         Log.d("Main Activity", "Failed");
     }
 
+//    Is automatically called when the Geofences part is ready
     @Override
     public void onResult(@NonNull Status status) {
         if (status.isSuccess()) {
@@ -426,11 +441,12 @@ public class MainActivity extends AppCompatActivity
             ).show();
         } else {
             // Get the status code for the error and log it using a user-friendly message.
-            String errorMessage = "IDK I DELETED THE CODE";
+            String errorMessage = "ERROR";
         }
 
     }
 
+//    Populates the list with all hardcoded geofences with entries from the class Constants
     public void populateGeofenceList() {
         for (Map.Entry<String, LatLng> entry : Constants.PLACES.entrySet()) {
             mGeofenceList.add(new Geofence.Builder()
@@ -447,6 +463,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+//    Gets the API Client ready and builds it so it can be used
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -462,6 +479,7 @@ public class MainActivity extends AppCompatActivity
         return builder.build();
     }
 
+//    Performs an action when the phone is near a geofenced area
     private PendingIntent getGeofencePendingIntent() {
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling addgeoFences()
