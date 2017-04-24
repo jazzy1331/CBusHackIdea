@@ -42,7 +42,7 @@ public class ParkingActivity extends FragmentActivity implements OnMapReadyCallb
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+//        Creates a map around the area of San Diego that has simulated data from GE
         mMap.setLatLngBoundsForCameraTarget(BOUNDS);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BOUNDS.getCenter(), 15f));
         mMap.setMinZoomPreference(14f);
